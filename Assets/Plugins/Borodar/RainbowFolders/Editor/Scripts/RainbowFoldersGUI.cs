@@ -14,11 +14,11 @@ namespace Borodar.RainbowFolders
         private const double WINDOWS_UPDATE_DELAY = 0.2;
         private const float SMALL_ICON_SIZE = 16f;
 
-        private static readonly Color ROW_SHADING_COLOR = new Color(0f, 0f, 0f, 0.03f);
+        private static readonly Color ROW_SHADING_COLOR = new(0f, 0f, 0f, 0.03f);
 
-        private static readonly Dictionary<object, Action<int, Rect>> ON_GUI_ROW_CALLBACKS = new Dictionary<object, Action<int, Rect>>();
-        private static readonly Dictionary<object, Action> REPAINT_CALLBACKS = new Dictionary<object, Action>();
-        private static readonly HashSet<int> WINDOW_HASH_SET = new HashSet<int>();
+        private static readonly Dictionary<object, Action<EntityId, Rect>> ON_GUI_ROW_CALLBACKS = new();
+        private static readonly Dictionary<object, Action> REPAINT_CALLBACKS = new();
+        private static readonly HashSet<int> WINDOW_HASH_SET = new();
 
         private static Vector2Int _projectWindowsCount = Vector2Int.zero;
 
@@ -128,7 +128,7 @@ namespace Borodar.RainbowFolders
         // GUI
         //--------------------------------------------------------------------
 
-        private static void DrawFoldouts(Rect rect, int id, EditorWindow window)
+        private static void DrawFoldouts(Rect rect, EntityId assetId, EditorWindow window)
         {
             if (!ProjectPreferences.ShowProjectTree) return;
 
@@ -143,14 +143,14 @@ namespace Borodar.RainbowFolders
 
             GUI.DrawTextureWithTexCoords(foldoutRect, ProjectEditorUtility.GetFoldoutLevelsIcon(), texCoords);
 
-            if (IsRootItem(rect) || ProjectWindowAdapter.HasChildren(window, id)) return;
+            if (IsRootItem(rect) || ProjectWindowAdapter.HasChildren(window, assetId)) return;
 
             foldoutRect.width = 16f;
             foldoutRect.x = rect.x - 16f;
             GUI.DrawTexture(foldoutRect, ProjectEditorUtility.GetFoldoutIcon());
         }
 
-        private static void DrawIconInFirstColumn(object controller, object state, Rect rect, int assetId, string path)
+        private static void DrawIconInFirstColumn(object controller, object state, Rect rect, EntityId assetId, string path)
         {
             if (!AssetDatabase.IsValidFolder(path)) return;
 
@@ -266,7 +266,7 @@ namespace Borodar.RainbowFolders
                 // First Column
                 var state = ProjectWindowAdapter.GetTreeViewState(controller);
 
-                void OnGUIRowCallback(int id, Rect rect)
+                void OnGUIRowCallback(EntityId id, Rect rect)
                 {
                     DrawFoldouts(rect, id, window);
 
