@@ -62,69 +62,65 @@ namespace Borodar.RainbowFolders
 
             try
             {
-                // Reflections
-
                 var assembly = Assembly.GetAssembly(typeof(EditorWindow));
 
                 // Project Browser
 
-                var projectWindowType = assembly.GetType(EDITOR_WINDOW_TYPE);
-                _allProjectBrowsersMethod = projectWindowType.GetMethod("GetAllProjectBrowsers", STATIC_PUBLIC);
-                _projectBrowserInitializedMethod = projectWindowType.GetMethod("Initialized", INSTANCE_PUBLIC);
+                var projectWindowType = GetRequiredType(assembly, EDITOR_WINDOW_TYPE);
+                _allProjectBrowsersMethod = GetRequiredMethod(projectWindowType, "GetAllProjectBrowsers", STATIC_PUBLIC);
+                _projectBrowserInitializedMethod = GetRequiredMethod(projectWindowType, "Initialized", INSTANCE_PUBLIC);
 
                 // First Column
 
-                _projectViewModeField = projectWindowType.GetField("m_ViewMode", INSTANCE_PRIVATE);
-                _projectAssetTreeField = projectWindowType.GetField("m_AssetTree", INSTANCE_PRIVATE);
-                _projectFolderTreeField = projectWindowType.GetField("m_FolderTree", INSTANCE_PRIVATE);
+                _projectViewModeField = GetRequiredField(projectWindowType, "m_ViewMode", INSTANCE_PRIVATE);
+                _projectAssetTreeField = GetRequiredField(projectWindowType, "m_AssetTree", INSTANCE_PRIVATE);
+                _projectFolderTreeField = GetRequiredField(projectWindowType, "m_FolderTree", INSTANCE_PRIVATE);
 
-                var treeViewControllerTypeGeneric = assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewController`1");
+                var treeViewControllerTypeGeneric = GetRequiredType(assembly, "UnityEditor.IMGUI.Controls.TreeViewController`1");
                 var treeViewControllerType = treeViewControllerTypeGeneric.MakeGenericType(typeof(EntityId));
 
-                _controllerDragSelectionField = treeViewControllerType.GetField("m_DragSelection", INSTANCE_PRIVATE);
+                _controllerDragSelectionField = GetRequiredField(treeViewControllerType, "m_DragSelection", INSTANCE_PRIVATE);
 
-                _integerCacheListField = treeViewControllerTypeGeneric.GetNestedType("IntegerCache", INSTANCE_PRIVATE)
-                    .MakeGenericType(typeof(EntityId))
-                    .GetField("m_List", INSTANCE_PRIVATE);
+                var integerCacheType = GetRequiredType(treeViewControllerTypeGeneric, "IntegerCache", INSTANCE_PRIVATE);
+                _integerCacheListField = GetRequiredField(integerCacheType.MakeGenericType(typeof(EntityId)), "m_List", INSTANCE_PRIVATE);
 
-                _controllerDataProperty = treeViewControllerType.GetProperty("data", INSTANCE_PUBLIC);
-                _controllerStateProperty = treeViewControllerType.GetProperty("state", INSTANCE_PUBLIC);
-                _controllerGUICallbackProperty = treeViewControllerType.GetProperty("onGUIRowCallback", INSTANCE_PUBLIC);
-                _controllerHasFocusMethod = treeViewControllerType.GetMethod("HasFocus", INSTANCE_PUBLIC);
+                _controllerDataProperty = GetRequiredProperty(treeViewControllerType, "data", INSTANCE_PUBLIC);
+                _controllerStateProperty = GetRequiredProperty(treeViewControllerType, "state", INSTANCE_PUBLIC);
+                _controllerGUICallbackProperty = GetRequiredProperty(treeViewControllerType, "onGUIRowCallback", INSTANCE_PUBLIC);
+                _controllerHasFocusMethod = GetRequiredMethod(treeViewControllerType, "HasFocus", INSTANCE_PUBLIC);
 
-                var treeViewStateGeneric = assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewState`1");
+                var treeViewStateGeneric = GetRequiredType(assembly, "UnityEditor.IMGUI.Controls.TreeViewState`1");
                 var treeViewState = treeViewStateGeneric.MakeGenericType(typeof(EntityId));
+                _stateSelectedIdsProperty = GetRequiredProperty(treeViewState, "selectedIDs", INSTANCE_PUBLIC);
 
-                _stateSelectedIdsProperty = treeViewState.GetProperty("selectedIDs", INSTANCE_PUBLIC);
+                var oneColumnTreeViewDataType = GetRequiredType(assembly, "UnityEditor.ProjectBrowserColumnOneTreeViewDataSource");
+                _twoColumnItemsMethod = GetRequiredMethod(oneColumnTreeViewDataType, "GetRows", INSTANCE_PUBLIC);
 
-                var oneColumnTreeViewDataType = assembly.GetType("UnityEditor.ProjectBrowserColumnOneTreeViewDataSource");
-                _twoColumnItemsMethod = oneColumnTreeViewDataType.GetMethod("GetRows", INSTANCE_PUBLIC);
-
-                var twoColumnTreeViewDataType = assembly.GetType("UnityEditor.AssetsTreeViewDataSource");
-                _oneColumnItemsMethod = twoColumnTreeViewDataType.GetMethod("GetRows", INSTANCE_PUBLIC);
+                var twoColumnTreeViewDataType = GetRequiredType(assembly, "UnityEditor.AssetsTreeViewDataSource");
+                _oneColumnItemsMethod = GetRequiredMethod(twoColumnTreeViewDataType, "GetRows", INSTANCE_PUBLIC);
 
                 // Second Column
 
-                _projectObjectListField = projectWindowType.GetField("m_ListArea", INSTANCE_PRIVATE);
+                _projectObjectListField = GetRequiredField(projectWindowType, "m_ListArea", INSTANCE_PRIVATE);
 
-                var objectListType = assembly.GetType("UnityEditor.ObjectListArea");
-                _projectLocalAssetsField = objectListType.GetField("m_LocalAssets", INSTANCE_PRIVATE);
-                _objectListRepaintCallback = objectListType.GetProperty("repaintCallback", INSTANCE_PUBLIC);
-                _objectListIconEvent = objectListType.GetField("postAssetIconDrawCallback", STATIC_PRIVATE);
+                var objectListType = GetRequiredType(assembly, "UnityEditor.ObjectListArea");
+                _projectLocalAssetsField = GetRequiredField(objectListType, "m_LocalAssets", INSTANCE_PRIVATE);
+                _objectListRepaintCallback = GetRequiredProperty(objectListType, "repaintCallback", INSTANCE_PUBLIC);
+                _objectListIconEvent = GetRequiredField(objectListType, "postAssetIconDrawCallback", STATIC_PRIVATE);
 
-                var localGroupType = objectListType.GetNestedType("LocalGroup", INSTANCE_PRIVATE);
-                _assetsListModeProperty = localGroupType.GetProperty("ListMode", INSTANCE_PUBLIC);
-                _listFilteredHierarchyField = localGroupType.GetField("m_FilteredHierarchy", INSTANCE_PRIVATE);
+                var localGroupType = GetRequiredType(objectListType, "LocalGroup", INSTANCE_PRIVATE);
+                _assetsListModeProperty = GetRequiredProperty(localGroupType, "ListMode", INSTANCE_PUBLIC);
+                _listFilteredHierarchyField = GetRequiredField(localGroupType, "m_FilteredHierarchy", INSTANCE_PRIVATE);
 
-                var filteredHierarchyType = assembly.GetType("UnityEditor.FilteredHierarchy");
-                _filteredHierarchyResultsMethod = filteredHierarchyType.GetProperty("results", INSTANCE_PUBLIC);
+                var filteredHierarchyType = GetRequiredType(assembly, "UnityEditor.FilteredHierarchy");
+                _filteredHierarchyResultsMethod = GetRequiredProperty(filteredHierarchyType, "results", INSTANCE_PUBLIC);
 
                 // Filter Result
 
-                var filterResultType = filteredHierarchyType.GetNestedType("FilterResult");
-                _filterResultIDField = filterResultType.GetField("entityId", INSTANCE_PUBLIC);
-                _filterResultIsFolderField = filterResultType.GetField("isFolder", INSTANCE_PUBLIC);
-                _filterResultIconProperty = filterResultType.GetProperty("icon", INSTANCE_PUBLIC);
+                var filterResultType = GetRequiredType(filteredHierarchyType, "FilterResult", INSTANCE_PRIVATE | INSTANCE_PUBLIC | STATIC_PRIVATE | STATIC_PUBLIC);
+                _filterResultIDField = GetRequiredField(filterResultType, "entityId", INSTANCE_PUBLIC);
+                _filterResultIsFolderField = GetRequiredField(filterResultType, "isFolder", INSTANCE_PUBLIC);
+                _filterResultIconProperty = GetRequiredProperty(filterResultType, "icon", INSTANCE_PUBLIC);
 
                 // Callbacks
                 ProjectRuleset.OnRulesetChange -= ApplyDefaultIconsToSecondColumn;
@@ -386,6 +382,40 @@ namespace Borodar.RainbowFolders
         private static bool ListItemIsFolder(object listItem)
         {
             return (bool) _filterResultIsFolderField.GetValue(listItem);
+        }
+
+        //---------------------------------------------------------------------
+        // Reflection Strict Wrappers
+        //---------------------------------------------------------------------
+
+        private static Type GetRequiredType(Assembly assembly, string typeName)
+        {
+            var type = assembly.GetType(typeName);
+            return type ?? throw new InvalidOperationException($"Type '{typeName}' not found.");
+        }
+
+        private static Type GetRequiredType(Type parentType, string nestedTypeName, BindingFlags flags)
+        {
+            var type = parentType.GetNestedType(nestedTypeName, flags);
+            return type ?? throw new InvalidOperationException($"Nested type '{nestedTypeName}' not found in '{parentType.Name}'.");
+        }
+
+        private static MethodInfo GetRequiredMethod(Type type, string methodName, BindingFlags flags)
+        {
+            var method = type.GetMethod(methodName, flags);
+            return method ?? throw new InvalidOperationException($"Method '{methodName}' not found in type '{type.Name}'.");
+        }
+
+        private static FieldInfo GetRequiredField(Type type, string fieldName, BindingFlags flags)
+        {
+            var field = type.GetField(fieldName, flags);
+            return field ?? throw new InvalidOperationException($"Field '{fieldName}' not found in type '{type.Name}'.");
+        }
+
+        private static PropertyInfo GetRequiredProperty(Type type, string propertyName, BindingFlags flags)
+        {
+            var property = type.GetProperty(propertyName, flags);
+            return property ?? throw new InvalidOperationException($"Property '{propertyName}' not found in type '{type.Name}'.");;
         }
 
         //---------------------------------------------------------------------
