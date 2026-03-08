@@ -19,108 +19,126 @@ namespace Borodar.RainbowFolders
         private const BindingFlags INSTANCE_PUBLIC = BindingFlags.Instance | BindingFlags.Public;
 
         // Project Browser
-        private static readonly MethodInfo ALL_PROJECT_BROWSERS_METHOD;
-        private static readonly MethodInfo PROJECT_BROWSER_INITIALIZED_METHOD;
+        private static MethodInfo _allProjectBrowsersMethod;
+        private static MethodInfo _projectBrowserInitializedMethod;
         // First Column
-        private static readonly FieldInfo PROJECT_VIEW_MODE_FIELD;
-        private static readonly FieldInfo PROJECT_ASSET_TREE_FIELD;
-        private static readonly FieldInfo PROJECT_FOLDER_TREE_FIELD;
-        private static readonly FieldInfo CONTROLLER_DRAG_SELECTION_FIELD;
-        private static readonly FieldInfo INTEGER_CACHE_LIST_FIELD;
+        private static FieldInfo _projectViewModeField;
+        private static FieldInfo _projectAssetTreeField;
+        private static FieldInfo _projectFolderTreeField;
+        private static FieldInfo _controllerDragSelectionField;
+        private static FieldInfo _integerCacheListField;
 
-        private static readonly PropertyInfo CONTROLLER_DATA_PROPERTY;
-        private static readonly PropertyInfo CONTROLLER_STATE_PROPERTY;
-        private static readonly PropertyInfo CONTROLLER_GUI_CALLBACK_PROPERTY;
-        private static readonly MethodInfo CONTROLLER_HAS_FOCUS_METHOD;
-        private static readonly PropertyInfo STATE_SELECTED_IDS_PROPERTY;
-        private static readonly MethodInfo TWO_COLUMN_ITEMS_METHOD;
-        private static readonly MethodInfo ONE_COLUMN_ITEMS_METHOD;
+        private static PropertyInfo _controllerDataProperty;
+        private static PropertyInfo _controllerStateProperty;
+        private static PropertyInfo _controllerGUICallbackProperty;
+        private static  MethodInfo _controllerHasFocusMethod;
+        private static PropertyInfo _stateSelectedIdsProperty;
+        private static MethodInfo _twoColumnItemsMethod;
+        private static MethodInfo _oneColumnItemsMethod;
         // Second Column
-        private static readonly FieldInfo PROJECT_OBJECT_LIST_FIELD;
-        private static readonly FieldInfo PROJECT_LOCAL_ASSETS_FIELD;
-        private static readonly PropertyInfo OBJECT_LIST_REPAINT_CALLBACK;
-        private static readonly FieldInfo OBJECT_LIST_ICON_EVENT;
-        private static readonly PropertyInfo ASSETS_LIST_MODE_PROPERTY;
-        private static readonly FieldInfo LIST_FILTERED_HIERARCHY_FIELD;
-        private static readonly PropertyInfo FILTERED_HIERARCHY_RESULTS_METHOD;
+        private static FieldInfo _projectObjectListField;
+        private static FieldInfo _projectLocalAssetsField;
+        private static PropertyInfo _objectListRepaintCallback;
+        private static FieldInfo _objectListIconEvent;
+        private static PropertyInfo _assetsListModeProperty;
+        private static FieldInfo _listFilteredHierarchyField;
+        private static PropertyInfo _filteredHierarchyResultsMethod;
         // Filter Result
-        private static readonly FieldInfo FILTER_RESULT_ID_FIELD;
-        private static readonly FieldInfo FILTER_RESULT_IS_FOLDER_FIELD;
-        private static readonly PropertyInfo FILTER_RESULT_ICON_PROPERTY;
+        private static FieldInfo _filterResultIDField;
+        private static FieldInfo _filterResultIsFolderField;
+        private static PropertyInfo _filterResultIconProperty;
+
+        private static bool _isInitialized;
+        private static bool _isInternalApiSupported;
 
         //---------------------------------------------------------------------
-        // Ctor
+        // Initialization
         //---------------------------------------------------------------------
 
-        static ProjectWindowAdapter()
+        private static bool EnsureInitialized()
         {
-            // Reflections            
+            if (_isInitialized) return _isInternalApiSupported;
+            _isInitialized = true;
 
-            var assembly = Assembly.GetAssembly(typeof(EditorWindow));
+            try
+            {
+                // Reflections
 
-            // Project Browser
+                var assembly = Assembly.GetAssembly(typeof(EditorWindow));
 
-            var projectWindowType = assembly.GetType(EDITOR_WINDOW_TYPE);
-            ALL_PROJECT_BROWSERS_METHOD = projectWindowType.GetMethod("GetAllProjectBrowsers", STATIC_PUBLIC);
-            PROJECT_BROWSER_INITIALIZED_METHOD = projectWindowType.GetMethod("Initialized", INSTANCE_PUBLIC);
-            
-            // First Column
+                // Project Browser
 
-            PROJECT_VIEW_MODE_FIELD = projectWindowType.GetField("m_ViewMode", INSTANCE_PRIVATE);
-            PROJECT_ASSET_TREE_FIELD = projectWindowType.GetField("m_AssetTree", INSTANCE_PRIVATE);
-            PROJECT_FOLDER_TREE_FIELD = projectWindowType.GetField("m_FolderTree", INSTANCE_PRIVATE);
+                var projectWindowType = assembly.GetType(EDITOR_WINDOW_TYPE);
+                _allProjectBrowsersMethod = projectWindowType.GetMethod("GetAllProjectBrowsers", STATIC_PUBLIC);
+                _projectBrowserInitializedMethod = projectWindowType.GetMethod("Initialized", INSTANCE_PUBLIC);
 
-            var treeViewControllerTypeGeneric = assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewController`1");
-            var treeViewControllerType = treeViewControllerTypeGeneric.MakeGenericType(typeof(EntityId));
+                // First Column
 
-            CONTROLLER_DRAG_SELECTION_FIELD = treeViewControllerType.GetField("m_DragSelection", INSTANCE_PRIVATE);
+                _projectViewModeField = projectWindowType.GetField("m_ViewMode", INSTANCE_PRIVATE);
+                _projectAssetTreeField = projectWindowType.GetField("m_AssetTree", INSTANCE_PRIVATE);
+                _projectFolderTreeField = projectWindowType.GetField("m_FolderTree", INSTANCE_PRIVATE);
 
-            INTEGER_CACHE_LIST_FIELD = treeViewControllerTypeGeneric.GetNestedType("IntegerCache", INSTANCE_PRIVATE)
-                .MakeGenericType(typeof(EntityId))
-                .GetField("m_List", INSTANCE_PRIVATE);
+                var treeViewControllerTypeGeneric = assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewController`1");
+                var treeViewControllerType = treeViewControllerTypeGeneric.MakeGenericType(typeof(EntityId));
 
-            CONTROLLER_DATA_PROPERTY = treeViewControllerType.GetProperty("data", INSTANCE_PUBLIC);
-            CONTROLLER_STATE_PROPERTY = treeViewControllerType.GetProperty("state", INSTANCE_PUBLIC);
-            CONTROLLER_GUI_CALLBACK_PROPERTY = treeViewControllerType.GetProperty("onGUIRowCallback", INSTANCE_PUBLIC);
-            CONTROLLER_HAS_FOCUS_METHOD = treeViewControllerType.GetMethod("HasFocus", INSTANCE_PUBLIC);
+                _controllerDragSelectionField = treeViewControllerType.GetField("m_DragSelection", INSTANCE_PRIVATE);
 
-            var treeViewStateGeneric = assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewState`1");
-            var treeViewState = treeViewStateGeneric.MakeGenericType(typeof(EntityId));
+                _integerCacheListField = treeViewControllerTypeGeneric.GetNestedType("IntegerCache", INSTANCE_PRIVATE)
+                    .MakeGenericType(typeof(EntityId))
+                    .GetField("m_List", INSTANCE_PRIVATE);
 
-            STATE_SELECTED_IDS_PROPERTY = treeViewState.GetProperty("selectedIDs", INSTANCE_PUBLIC);
+                _controllerDataProperty = treeViewControllerType.GetProperty("data", INSTANCE_PUBLIC);
+                _controllerStateProperty = treeViewControllerType.GetProperty("state", INSTANCE_PUBLIC);
+                _controllerGUICallbackProperty = treeViewControllerType.GetProperty("onGUIRowCallback", INSTANCE_PUBLIC);
+                _controllerHasFocusMethod = treeViewControllerType.GetMethod("HasFocus", INSTANCE_PUBLIC);
 
-            var oneColumnTreeViewDataType = assembly.GetType("UnityEditor.ProjectBrowserColumnOneTreeViewDataSource");
-            TWO_COLUMN_ITEMS_METHOD = oneColumnTreeViewDataType.GetMethod("GetRows", INSTANCE_PUBLIC);
-            
-            var twoColumnTreeViewDataType = assembly.GetType("UnityEditor.AssetsTreeViewDataSource");
-            ONE_COLUMN_ITEMS_METHOD = twoColumnTreeViewDataType.GetMethod("GetRows", INSTANCE_PUBLIC);
-            
-            // Second Column
+                var treeViewStateGeneric = assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewState`1");
+                var treeViewState = treeViewStateGeneric.MakeGenericType(typeof(EntityId));
 
-            PROJECT_OBJECT_LIST_FIELD = projectWindowType.GetField("m_ListArea", INSTANCE_PRIVATE);
-            
-            var objectListType = assembly.GetType("UnityEditor.ObjectListArea");            
-            PROJECT_LOCAL_ASSETS_FIELD = objectListType.GetField("m_LocalAssets", INSTANCE_PRIVATE);
-            OBJECT_LIST_REPAINT_CALLBACK = objectListType.GetProperty("repaintCallback", INSTANCE_PUBLIC);
-            OBJECT_LIST_ICON_EVENT = objectListType.GetField("postAssetIconDrawCallback", STATIC_PRIVATE);
+                _stateSelectedIdsProperty = treeViewState.GetProperty("selectedIDs", INSTANCE_PUBLIC);
 
-            var localGroupType = objectListType.GetNestedType("LocalGroup", INSTANCE_PRIVATE);
-            ASSETS_LIST_MODE_PROPERTY = localGroupType.GetProperty("ListMode", INSTANCE_PUBLIC);
-            LIST_FILTERED_HIERARCHY_FIELD = localGroupType.GetField("m_FilteredHierarchy", INSTANCE_PRIVATE);
-            
-            var filteredHierarchyType = assembly.GetType("UnityEditor.FilteredHierarchy");            
-            FILTERED_HIERARCHY_RESULTS_METHOD = filteredHierarchyType.GetProperty("results", INSTANCE_PUBLIC);
-            
-            // Filter Result
-            
-            var filterResultType = filteredHierarchyType.GetNestedType("FilterResult");
-            FILTER_RESULT_ID_FIELD = filterResultType.GetField("entityId", INSTANCE_PUBLIC);
-            FILTER_RESULT_IS_FOLDER_FIELD = filterResultType.GetField("isFolder", INSTANCE_PUBLIC);
-            FILTER_RESULT_ICON_PROPERTY = filterResultType.GetProperty("icon", INSTANCE_PUBLIC);
+                var oneColumnTreeViewDataType = assembly.GetType("UnityEditor.ProjectBrowserColumnOneTreeViewDataSource");
+                _twoColumnItemsMethod = oneColumnTreeViewDataType.GetMethod("GetRows", INSTANCE_PUBLIC);
 
-            // Callbacks
+                var twoColumnTreeViewDataType = assembly.GetType("UnityEditor.AssetsTreeViewDataSource");
+                _oneColumnItemsMethod = twoColumnTreeViewDataType.GetMethod("GetRows", INSTANCE_PUBLIC);
 
-            ProjectRuleset.OnRulesetChange += ApplyDefaultIconsToSecondColumn;
+                // Second Column
+
+                _projectObjectListField = projectWindowType.GetField("m_ListArea", INSTANCE_PRIVATE);
+
+                var objectListType = assembly.GetType("UnityEditor.ObjectListArea");
+                _projectLocalAssetsField = objectListType.GetField("m_LocalAssets", INSTANCE_PRIVATE);
+                _objectListRepaintCallback = objectListType.GetProperty("repaintCallback", INSTANCE_PUBLIC);
+                _objectListIconEvent = objectListType.GetField("postAssetIconDrawCallback", STATIC_PRIVATE);
+
+                var localGroupType = objectListType.GetNestedType("LocalGroup", INSTANCE_PRIVATE);
+                _assetsListModeProperty = localGroupType.GetProperty("ListMode", INSTANCE_PUBLIC);
+                _listFilteredHierarchyField = localGroupType.GetField("m_FilteredHierarchy", INSTANCE_PRIVATE);
+
+                var filteredHierarchyType = assembly.GetType("UnityEditor.FilteredHierarchy");
+                _filteredHierarchyResultsMethod = filteredHierarchyType.GetProperty("results", INSTANCE_PUBLIC);
+
+                // Filter Result
+
+                var filterResultType = filteredHierarchyType.GetNestedType("FilterResult");
+                _filterResultIDField = filterResultType.GetField("entityId", INSTANCE_PUBLIC);
+                _filterResultIsFolderField = filterResultType.GetField("isFolder", INSTANCE_PUBLIC);
+                _filterResultIconProperty = filterResultType.GetProperty("icon", INSTANCE_PUBLIC);
+
+                // Callbacks
+                ProjectRuleset.OnRulesetChange -= ApplyDefaultIconsToSecondColumn;
+                ProjectRuleset.OnRulesetChange += ApplyDefaultIconsToSecondColumn;
+
+                _isInternalApiSupported = true;
+            }
+            catch (Exception ex)
+            {
+                RFLogger.LogWarning($"Extension disabled. Unity internal API change detected: {ex.Message}");
+                _isInternalApiSupported = false;
+            }
+
+            return _isInternalApiSupported;
         }
         
         //---------------------------------------------------------------------
@@ -130,8 +148,11 @@ namespace Borodar.RainbowFolders
         [SuppressMessage("ReSharper", "ReturnTypeCanBeEnumerable.Global")]
         public static IReadOnlyList<EditorWindow> GetAllProjectWindows()
         {
-            var browsersList = ALL_PROJECT_BROWSERS_METHOD.Invoke(null, null);
+            if (!EnsureInitialized()) return new List<EditorWindow>();
+
+            var browsersList = _allProjectBrowsersMethod.Invoke(null, null);
             return (IReadOnlyList<EditorWindow>) browsersList;
+
         }
         
         public static EditorWindow GetFirstProjectWindow()
@@ -141,21 +162,26 @@ namespace Borodar.RainbowFolders
 
         public static object GetAssetTreeController(EditorWindow window)
         {
-            return PROJECT_ASSET_TREE_FIELD.GetValue(window);
+            if (!EnsureInitialized()) return null;
+            return _projectAssetTreeField.GetValue(window);
         }
 
         public static object GetFolderTreeController(EditorWindow window)
         {
-            return PROJECT_FOLDER_TREE_FIELD.GetValue(window);
+            if (!EnsureInitialized()) return null;
+            return _projectFolderTreeField.GetValue(window);
         }
 
         public static object GetTreeViewState(object treeViewController)
         {
-            return CONTROLLER_STATE_PROPERTY.GetValue(treeViewController);
+            if (!EnsureInitialized()) return null;
+            return _controllerStateProperty.GetValue(treeViewController);
         }
 
         public static bool HasChildren(EditorWindow window, EntityId assetId)
         {
+            if (!EnsureInitialized()) return false;
+
             var treeViewItems = GetFirstColumnItems(window);
             if (treeViewItems == null) return false;
 
@@ -165,8 +191,10 @@ namespace Borodar.RainbowFolders
 
         public static bool IsItemSelected(object treeViewController, object state, EntityId assetId)
         {
-            var dragSelectionField = CONTROLLER_DRAG_SELECTION_FIELD.GetValue(treeViewController);
-            var dragSelection = (List<EntityId>) INTEGER_CACHE_LIST_FIELD.GetValue(dragSelectionField);
+            if (!EnsureInitialized()) return false;
+
+            var dragSelectionField = _controllerDragSelectionField.GetValue(treeViewController);
+            var dragSelection = (List<EntityId>) _integerCacheListField.GetValue(dragSelectionField);
 
             if (dragSelection != null && dragSelection.Count > 0)
             {
@@ -174,37 +202,43 @@ namespace Borodar.RainbowFolders
             }
             else
             {
-                var selectedIds = (List<EntityId>) STATE_SELECTED_IDS_PROPERTY.GetValue(state);
+                var selectedIds = (List<EntityId>) _stateSelectedIdsProperty.GetValue(state);
                 return selectedIds.Contains(assetId);
             }
         }
 
         public static bool HasFocus(object treeViewController)
         {
-            return (bool) CONTROLLER_HAS_FOCUS_METHOD.Invoke(treeViewController, null);
+            if (!EnsureInitialized()) return false;
+            return (bool) _controllerHasFocusMethod.Invoke(treeViewController, null);
         }
 
         public static ViewMode GetProjectViewMode(EditorWindow window)
         {
-            return (ViewMode) PROJECT_VIEW_MODE_FIELD.GetValue(window);
+            if (!EnsureInitialized()) return ViewMode.OneColumn;
+            return (ViewMode) _projectViewModeField.GetValue(window);
         }
 
         public static bool ProjectWindowInitialized(EditorWindow window)
         {
-            return (bool) PROJECT_BROWSER_INITIALIZED_METHOD.Invoke(window, null);
+            if (!EnsureInitialized()) return false;
+            return (bool) _projectBrowserInitializedMethod.Invoke(window, null);
         }
 
         public static object GetObjectListArea(EditorWindow window)
         {
-            return PROJECT_OBJECT_LIST_FIELD.GetValue(window);
+            if (!EnsureInitialized()) return null;
+            return _projectObjectListField.GetValue(window);
         }
 
         public static void ReplaceIconsInListArea(object objectListArea, ProjectRuleset ruleset)
         {
-            var localAssets = PROJECT_LOCAL_ASSETS_FIELD.GetValue(objectListArea);
+            if (!EnsureInitialized()) return;
+
+            var localAssets = _projectLocalAssetsField.GetValue(objectListArea);
             var inListMode = InListMode(localAssets);
-            var filteredHierarchy = LIST_FILTERED_HIERARCHY_FIELD.GetValue(localAssets);
-            var items = FILTERED_HIERARCHY_RESULTS_METHOD.GetValue(filteredHierarchy, null);
+            var filteredHierarchy = _listFilteredHierarchyField.GetValue(localAssets);
+            var items = _filteredHierarchyResultsMethod.GetValue(filteredHierarchy, null);
 
             foreach (var item in (IEnumerable<object>) items)
             {
@@ -239,35 +273,45 @@ namespace Borodar.RainbowFolders
         [SuppressMessage("ReSharper", "DelegateSubtraction")]
         public static void AddOnGUIRowCallback(object treeViewController, Action<EntityId, Rect> action)
         {
-            var value = (Action<EntityId, Rect>) CONTROLLER_GUI_CALLBACK_PROPERTY.GetValue(treeViewController);
-            CONTROLLER_GUI_CALLBACK_PROPERTY.SetValue(treeViewController, action + value);
+            if (!EnsureInitialized()) return;
+
+            var value = (Action<EntityId, Rect>) _controllerGUICallbackProperty.GetValue(treeViewController);
+            _controllerGUICallbackProperty.SetValue(treeViewController, action + value);
         }
 
         [SuppressMessage("ReSharper", "DelegateSubtraction")]
         public static void RemoveOnGUIRowCallback(object treeViewController, Action<EntityId, Rect> action)
         {
-            var value = (Action<EntityId, Rect>) CONTROLLER_GUI_CALLBACK_PROPERTY.GetValue(treeViewController);
-            CONTROLLER_GUI_CALLBACK_PROPERTY.SetValue(treeViewController, value - action);
+            if (!EnsureInitialized()) return;
+
+            var value = (Action<EntityId, Rect>) _controllerGUICallbackProperty.GetValue(treeViewController);
+            _controllerGUICallbackProperty.SetValue(treeViewController, value - action);
         }
 
         public static void AddRepaintCallback(object objectListArea, Action repaintCallback)
         {
-            var value = (Action) OBJECT_LIST_REPAINT_CALLBACK.GetValue(objectListArea);
-            OBJECT_LIST_REPAINT_CALLBACK.SetValue(objectListArea, value + repaintCallback);
+            if (!EnsureInitialized()) return;
+
+            var value = (Action) _objectListRepaintCallback.GetValue(objectListArea);
+            _objectListRepaintCallback.SetValue(objectListArea, value + repaintCallback);
         }
 
         [SuppressMessage("ReSharper", "DelegateSubtraction")]
         public static void RemoveRepaintCallback(object objectListArea, Action repaintCallback)
         {
-            var value = (Action) OBJECT_LIST_REPAINT_CALLBACK.GetValue(objectListArea);
-            OBJECT_LIST_REPAINT_CALLBACK.SetValue(objectListArea, value - repaintCallback);
+            if (!EnsureInitialized()) return;
+
+            var value = (Action) _objectListRepaintCallback.GetValue(objectListArea);
+            _objectListRepaintCallback.SetValue(objectListArea, value - repaintCallback);
         }
 
         public static void AddPostAssetIconDrawCallback(Type target, string method)
         {
-            var tempDelegate = Delegate.CreateDelegate(OBJECT_LIST_ICON_EVENT.FieldType, target, method);
-            var value = (Delegate) OBJECT_LIST_ICON_EVENT.GetValue(null);
-            OBJECT_LIST_ICON_EVENT.SetValue(null, Delegate.Combine(tempDelegate, value));
+            if (!EnsureInitialized()) return;
+
+            var tempDelegate = Delegate.CreateDelegate(_objectListIconEvent.FieldType, target, method);
+            var value = (Delegate) _objectListIconEvent.GetValue(null);
+            _objectListIconEvent.SetValue(null, Delegate.Combine(tempDelegate, value));
         }
 
         //---------------------------------------------------------------------
@@ -277,19 +321,19 @@ namespace Borodar.RainbowFolders
         [SuppressMessage("ReSharper", "InvertIf")]
         private static IEnumerable<TreeViewItem<EntityId>> GetFirstColumnItems(EditorWindow window)
         {
-            var oneColumnTree = PROJECT_ASSET_TREE_FIELD.GetValue(window);
+            var oneColumnTree = _projectAssetTreeField.GetValue(window);
             if (oneColumnTree != null)
             {                
-                var treeViewData = CONTROLLER_DATA_PROPERTY.GetValue(oneColumnTree, null);
-                var treeViewItems = (IEnumerable<TreeViewItem<EntityId>>) ONE_COLUMN_ITEMS_METHOD.Invoke(treeViewData, null);
+                var treeViewData = _controllerDataProperty.GetValue(oneColumnTree, null);
+                var treeViewItems = (IEnumerable<TreeViewItem<EntityId>>) _oneColumnItemsMethod.Invoke(treeViewData, null);
                 return treeViewItems;
             }
             
-            var twoColumnTree = PROJECT_FOLDER_TREE_FIELD.GetValue(window);
+            var twoColumnTree = _projectFolderTreeField.GetValue(window);
             if (twoColumnTree != null)
             {                
-                var treeViewData = CONTROLLER_DATA_PROPERTY.GetValue(twoColumnTree, null);
-                var treeViewItems = (IEnumerable<TreeViewItem<EntityId>>) TWO_COLUMN_ITEMS_METHOD.Invoke(treeViewData, null);
+                var treeViewData = _controllerDataProperty.GetValue(twoColumnTree, null);
+                var treeViewItems = (IEnumerable<TreeViewItem<EntityId>>) _twoColumnItemsMethod.Invoke(treeViewData, null);
                 return treeViewItems;
             }
 
@@ -298,14 +342,14 @@ namespace Borodar.RainbowFolders
 
         private static IEnumerable<object> GetSecondColumnItems(EditorWindow window, bool onlyInListMode = false)
         {
-            var assetsList = PROJECT_OBJECT_LIST_FIELD.GetValue(window);
+            var assetsList = _projectObjectListField.GetValue(window);
             if (assetsList == null) return null;
             
-            var localAssets = PROJECT_LOCAL_ASSETS_FIELD.GetValue(assetsList);                
+            var localAssets = _projectLocalAssetsField.GetValue(assetsList);
             if (onlyInListMode && !InListMode(localAssets)) return null;
                 
-            var filteredHierarchy = LIST_FILTERED_HIERARCHY_FIELD.GetValue(localAssets);
-            var results = FILTERED_HIERARCHY_RESULTS_METHOD.GetValue(filteredHierarchy, null);
+            var filteredHierarchy = _listFilteredHierarchyField.GetValue(localAssets);
+            var results = _filteredHierarchyResultsMethod.GetValue(filteredHierarchy, null);
                 
             return (IEnumerable<object>) results;
         }
@@ -319,29 +363,29 @@ namespace Borodar.RainbowFolders
 
                 foreach (var item in listItems) SetIconForListItem(item, null);
 
-                // Repaint current project window
+                // Repaint the current project window
                 window.Repaint();
             }
         }
 
         private static bool InListMode(object localAssets)
         {
-            return (bool) ASSETS_LIST_MODE_PROPERTY.GetValue(localAssets, null);
+            return (bool) _assetsListModeProperty.GetValue(localAssets, null);
         }
 
         private static EntityId GetInstanceIdFromListItem(object listItem)
         {
-            return (EntityId) FILTER_RESULT_ID_FIELD.GetValue(listItem);
+            return (EntityId) _filterResultIDField.GetValue(listItem);
         }
 
         private static void SetIconForListItem(object listItem, Texture2D icon)
         {
-            FILTER_RESULT_ICON_PROPERTY.SetValue(listItem, icon, null);
+            _filterResultIconProperty.SetValue(listItem, icon, null);
         }
 
         private static bool ListItemIsFolder(object listItem)
         {
-            return (bool) FILTER_RESULT_IS_FOLDER_FIELD.GetValue(listItem);
+            return (bool) _filterResultIsFolderField.GetValue(listItem);
         }
 
         //---------------------------------------------------------------------
