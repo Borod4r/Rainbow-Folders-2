@@ -65,7 +65,7 @@ namespace Borodar.RainbowFolders
 
             var dragModifierLabel = new GUIContent("Drag Modifier", DRAG_MODIFIER_HINT);
             DRAG_MODIFIER_PREF = new EditorPrefsModifierKey(DRAG_MODIFIER_PKEY + projectName, DRAG_MODIFIER_DEFAULT, dragModifierLabel);
-            _dragModifier = EDIT_MODIFIER_PREF.Value;
+            _dragModifier = DRAG_MODIFIER_PREF.Value;
             
             var hierarchyTreeLabel = new GUIContent("Project Tree", PROJECT_TREE_HINT);
             PROJECT_TREE_PREF = new EditorPrefsBooleanRepaint(PROJECT_TREE_PKEY + projectName, PROJECT_TREE_DEFAULT, hierarchyTreeLabel, PREF_LABEL_WIDTH);
