@@ -123,8 +123,8 @@ namespace Borodar.RainbowFolders
                 _filterResultIconProperty = GetRequiredProperty(filterResultType, "icon", INSTANCE_PUBLIC);
 
                 // Callbacks
-                ProjectRuleset.OnRulesetChange -= ApplyDefaultIconsToSecondColumn;
-                ProjectRuleset.OnRulesetChange += ApplyDefaultIconsToSecondColumn;
+                ProjectRuleset.RulesetChanged -= ApplyDefaultIconsToSecondColumn;
+                ProjectRuleset.RulesetChanged += ApplyDefaultIconsToSecondColumn;
 
                 _isInternalApiSupported = true;
             }

@@ -123,7 +123,7 @@ namespace Borodar.RainbowFolders
 
         private static void OnRulesetChange()
         {
-            ProjectRuleset.OnRulesetChange();
+            ProjectRuleset.RulesetChanged?.Invoke();
         }
 
         private void DrawSearchByFolderPanel(bool forceUpdate)
@@ -321,7 +321,7 @@ namespace Borodar.RainbowFolders
             // Track changes in reorderable list
             if (EditorGUI.EndChangeCheck())
             {
-                ProjectRuleset.OnRulesetChange();
+                ProjectRuleset.RulesetChanged?.Invoke();
                 serializedObject.ApplyModifiedProperties();
             }
         }

@@ -91,7 +91,7 @@ namespace Borodar.RainbowFolders
         {
             var serializedObject = projectItem.serializedObject;
             serializedObject.ApplyModifiedProperties();
-            ProjectRuleset.OnRulesetChange();
+            ProjectRuleset.RulesetChanged?.Invoke();
             Close();
         }
 

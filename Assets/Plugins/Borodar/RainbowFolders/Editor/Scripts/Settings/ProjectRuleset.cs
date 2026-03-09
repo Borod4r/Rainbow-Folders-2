@@ -37,7 +37,7 @@ namespace Borodar.RainbowFolders
         // Events
         //---------------------------------------------------------------------
 
-        public static Action OnRulesetChange;
+        public static Action RulesetChanged;
 
         //---------------------------------------------------------------------
         // Instance
@@ -63,7 +63,7 @@ namespace Borodar.RainbowFolders
         private void OnEnable()
         {
             SubscribeToUndo();
-            OnRulesetChange();
+            RulesetChanged?.Invoke();
         }
 
         [SuppressMessage("ReSharper", "DelegateSubtraction")]
@@ -197,7 +197,7 @@ namespace Borodar.RainbowFolders
         public void SaveSetting()
         {
             EditorUtility.SetDirty(this);
-            OnRulesetChange();
+            RulesetChanged?.Invoke();
         }
 
         //---------------------------------------------------------------------
@@ -258,14 +258,14 @@ namespace Borodar.RainbowFolders
         private static void SubscribeToRulesetChanges()
         {
             UnsubscribeFromRulesetChanges();
-            OnRulesetChange += _instance.UpdateOrdinals;
-            OnRulesetChange += _instance.UpdateDictionaries;
+            RulesetChanged += _instance.UpdateOrdinals;
+            RulesetChanged += _instance.UpdateDictionaries;
         }
 
         private static void UnsubscribeFromRulesetChanges()
         {
-            OnRulesetChange -= _instance.UpdateOrdinals;
-            OnRulesetChange -= _instance.UpdateDictionaries;
+            RulesetChanged -= _instance.UpdateOrdinals;
+            RulesetChanged -= _instance.UpdateDictionaries;
         }
 
         private void SubscribeToUndo()
