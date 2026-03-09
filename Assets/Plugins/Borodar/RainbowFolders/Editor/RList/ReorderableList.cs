@@ -1895,10 +1895,16 @@ namespace Borodar.RainbowFolders.RList {
 				boxBackground.border = new RectOffset(6, 3, 3, 6);
 				preButton = new GUIStyle("RL FooterButton");
 
-				expandButton = EditorGUIUtility.IconContent("align_vertically_center_active");
+				var expandIcon = EditorGUIUtility.FindTexture("winbtn_win_max") ??
+				                 EditorGUIUtility.FindTexture("winbtn_mac_max");
+
+				expandButton = expandIcon != null ? new GUIContent(expandIcon) : new GUIContent("+");
 				expandButton.tooltip = "Expand All Elements";
 
-				collapseButton = EditorGUIUtility.IconContent("winbtn_win_min");
+				var collapseIcon = EditorGUIUtility.FindTexture("winbtn_win_min") ??
+				                   EditorGUIUtility.FindTexture("winbtn_mac_min");
+
+				collapseButton = collapseIcon != null ? new GUIContent(collapseIcon) : new GUIContent("-");
 				collapseButton.tooltip = "Collapse All Elements";
 
 				sortAscending = EditorGUIUtility.IconContent("align_vertically_bottom");
