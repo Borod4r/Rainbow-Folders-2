@@ -1,31 +1,36 @@
 # Rainbow Folders 2
 
-Have you ever thought about highlighting often-used project folders in Unity Editor? This simple but colorful asset allows you to do that!
-
-With **Rainbow Folders 2**, you can set a custom icon and background for any folder in the Unity project browser.
+Stop hunting through monochromatic folders. The Rainbow Folders allow you to set custom icons and backgrounds for any folder in the Unity project browser, making navigation instant and visual.
 
 ![Browser window example](https://www.borodar.com/stuff/rainbowfolders/images/v020404/001.png)
 ![Browser window example](https://www.borodar.com/stuff/rainbowfolders/images/v020404/003.png)
 
-Just hold the **Alt key** and click on any of your folders.
+### How to use:
+
+Simply hold the Alt key and click any folder.
 
 ![Folder modifier key](https://www.borodar.com/stuff/rainbowfolders/images/v020404/009.png)
 
-A configuration dialog will appear, and you'll be able to assign a custom icon and background for it, your own one, or choose from dozens of presets!
+A configuration dialog will appear, allowing you to assign a custom icon and background from dozens of built-in presets or your own textures.
 
-![Folder modifier key](https://www.borodar.com/stuff/rainbowfolders/images/v020404/006.png)
+![Configuration dialog](https://www.borodar.com/stuff/rainbowfolders/images/v020404/006.png)
 
-### Features:
+### Key Features
 
-• Change icon and background for any folder in the Project window.
+* **Custom Visuals**: Change icons and backgrounds for any folder.
+* **Icon Library**: Includes over 70 pre-made, high-quality icons.
+* **Bulk Editing**: Update multiple folders simultaneously.
+* **Auto-Inheritance**: Apply custom styles to all subfolders automatically.
+* **Enhanced UI**: Optional row shading and project tree outlines for better readability.
+* **Full Source Code**: Completely open and customizable.
 
-• Change icon or background for multiple folders at once
+# Support the Project
+This project is Open Source. If you find it useful and would like to support its continued maintenance and development, please consider purchasing it on the [Asset Store](https://u3d.as/1v2R). Think of it as a "tip" to keep the updates coming!
 
-• Apply custom icon and background for all subfolders automatically
+# Technical Notes & Stability
 
-• Optional row shading and project tree outlines
-
-• More than 70 pre-made icons included
+* This asset relies heavily on Unity's internal Editor APIs. While stable for official releases, major Unity updates may occasionally break functionality until a patch is issued.
+* Alpha and Beta versions of the Unity Editor are not officially supported. Use at your own risk in those environments.
 
 # License
 
