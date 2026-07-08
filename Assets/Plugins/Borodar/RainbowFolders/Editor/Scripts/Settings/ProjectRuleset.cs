@@ -226,13 +226,37 @@ namespace Borodar.RainbowFolders
             LogWarning($"There is no ruleset at path: {assetPath}\n" +
                         "Trying to find another ruleset in project... ");
 
-            assetPath = ProjectEditorUtility.FindPathsForAllRulesets().FirstOrDefault();
+            // prefer editable rulesets over ones from immutable packages,
+            // so a user's existing ruleset always wins over the packaged default
+            assetPath = ProjectEditorUtility.FindPathsForAllRulesets()
+                .OrderBy(ProjectEditorUtility.IsAssetImmutable)
+                .FirstOrDefault();
             ruleset = AssetDatabase.LoadAssetAtPath<ProjectRuleset>(assetPath);
 
             if (ruleset)
             {
-                Log($"Found another ruleset at path: {assetPath}\n" +
-                            "You could select different one by using \"Edit → Project Settings → Rainbow Folders → Current Ruleset\"");
+                if (ProjectEditorUtility.IsAssetImmutable(assetPath))
+                {
+                    var localPath = AssetDatabase.GenerateUniqueAssetPath("Assets/RainbowFoldersRuleset.asset");
+                    if (AssetDatabase.CopyAsset(assetPath, localPath))
+                    {
+                        Log($"Ruleset at path: {assetPath} is inside an immutable package and cannot be edited.\n" +
+                            $"Copied it to: {localPath} and using the copy instead.");
+
+                        assetPath = localPath;
+                        ruleset = AssetDatabase.LoadAssetAtPath<ProjectRuleset>(localPath);
+                    }
+                    else
+                    {
+                        LogError($"Failed to copy ruleset from: {assetPath} to: {localPath}\n" +
+                                 "Using the immutable ruleset directly. Changes to it will not be saved.");
+                    }
+                }
+                else
+                {
+                    Log($"Found another ruleset at path: {assetPath}\n" +
+                        "You could select different one by using \"Edit → Project Settings → Rainbow Folders → Current Ruleset\"");
+                }
 
                 ProjectPreferences.UpdateRulesetPath(assetPath, true, false);
                 return ruleset;
