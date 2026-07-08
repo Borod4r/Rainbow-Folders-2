@@ -11,7 +11,7 @@ namespace Borodar.RainbowFolders
         private const float PREF_LABEL_WIDTH = 150f;
 
         private const string RULESET_PKEY = "Borodar.RainbowFolders.Ruleset.";
-        private const string RULESET_DEFAULT = "Assets/Plugins/RainbowAssets/RainbowFolders/Editor/Data/RainbowFoldersRuleset.asset";
+        private const string RULESET_DEFAULT = "Assets/Plugins/Borodar/RainbowFolders/Editor/Data/RainbowFoldersRuleset.asset";
         private const string RULESET_HINT = "The ruleset that is currently used. You could have multiple rulesets in your project and switch between them using this option.";
 
         private const string EDIT_MODIFIER_PKEY = "Borodar.RainbowFolders.EditMod.";
