@@ -226,13 +226,25 @@ namespace Borodar.RainbowFolders
             LogWarning($"There is no ruleset at path: {assetPath}\n" +
                         "Trying to find another ruleset in project... ");
 
-            assetPath = ProjectEditorUtility.FindPathsForAllRulesets().FirstOrDefault();
+            assetPath = ProjectEditorUtility.FindPathsForAllRulesets()
+                // Prefer editable rulesets to ones from immutable packages,
+                // so a user's existing ruleset always wins over the packaged default
+                .OrderBy(ProjectEditorUtility.IsAssetImmutable)
+                .FirstOrDefault();
+
             ruleset = AssetDatabase.LoadAssetAtPath<ProjectRuleset>(assetPath);
 
             if (ruleset)
             {
-                Log($"Found another ruleset at path: {assetPath}\n" +
-                            "You could select different one by using \"Edit → Project Settings → Rainbow Folders → Current Ruleset\"");
+                Log($"Found another ruleset at path: {assetPath}\n");
+
+                if (ProjectEditorUtility.IsAssetImmutable(assetPath))
+                {
+                    Log($"Ruleset at path: {assetPath} is inside an immutable package and cannot be modified.\n");
+                    CopyRulesetToLocal(ref assetPath, ref ruleset);
+                }
+
+                Log("You could select different one by using \"Edit → Project Settings → Rainbow Folders → Current Ruleset\"");
 
                 ProjectPreferences.UpdateRulesetPath(assetPath, true, false);
                 return ruleset;
@@ -253,6 +265,23 @@ namespace Borodar.RainbowFolders
                      "Please make sure that your project contains at least one ruleset and it has been imported correctly.");
 
             return null;
+        }
+
+        private static void CopyRulesetToLocal(ref string assetPath, ref ProjectRuleset ruleset)
+        {
+            var localPath = AssetDatabase.GenerateUniqueAssetPath("Assets/RainbowFoldersRuleset.asset");
+            if (AssetDatabase.CopyAsset(assetPath, localPath))
+            {
+                Log($"Copied ruleset from {assetPath} to: {localPath} and using the copy instead.");
+
+                assetPath = localPath;
+                ruleset = AssetDatabase.LoadAssetAtPath<ProjectRuleset>(localPath);
+            }
+            else
+            {
+                LogError($"Failed to copy ruleset from: {assetPath} to: {localPath}\n" +
+                         "Using the immutable ruleset directly. Changes to it will not be saved.");
+            }
         }
 
         private static void SubscribeToRulesetChanges()

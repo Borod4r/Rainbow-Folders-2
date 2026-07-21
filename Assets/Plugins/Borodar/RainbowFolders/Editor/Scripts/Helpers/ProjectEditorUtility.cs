@@ -98,6 +98,19 @@ namespace Borodar.RainbowFolders
             return rulesetGUIDs.Select(AssetDatabase.GUIDToAssetPath).ToArray();
         }
 
+        /// <summary>
+        /// Returns true when the asset lives in an immutable package (registry, git, etc.)
+        /// and therefore cannot be modified and saved.
+        /// </summary>
+        public static bool IsAssetImmutable(string assetPath)
+        {
+            var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(assetPath);
+            if (packageInfo == null) return false;
+
+            return packageInfo.source != UnityEditor.PackageManager.PackageSource.Embedded &&
+                   packageInfo.source != UnityEditor.PackageManager.PackageSource.Local;
+        }
+
         //---------------------------------------------------------------------
         // GUI
         //---------------------------------------------------------------------

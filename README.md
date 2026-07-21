@@ -5,6 +5,26 @@ Stop hunting through monochromatic folders. The Rainbow Folders allow you to set
 ![Browser window example](https://www.borodar.com/stuff/rainbowfolders/images/v020404/001.png)
 ![Browser window example](https://www.borodar.com/stuff/rainbowfolders/images/v020404/003.png)
 
+### Installation
+
+Install via Unity Package Manager as a git package:
+
+1. Open `Window → Package Manager`.
+2. Click `+` → `Install package from git URL...`
+3. Paste:
+
+```
+https://github.com/Borod4r/Rainbow-Folders-2.git?path=Assets/Plugins/Borodar/RainbowFolders
+```
+
+Or add it to `Packages/manifest.json` manually:
+
+```json
+"com.borodar.rainbow-folders": "https://github.com/Borod4r/Rainbow-Folders-2.git?path=Assets/Plugins/Borodar/RainbowFolders"
+```
+
+Alternatively, clone this repository and copy `Assets/Plugins/Borodar` into your project's `Assets` folder.
+
 ### How to use:
 
 Simply hold the Alt key and click any folder.
