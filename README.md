@@ -44,9 +44,6 @@ A configuration dialog will appear, allowing you to assign a custom icon and bac
 * **Enhanced UI**: Optional row shading and project tree outlines for better readability.
 * **Full Source Code**: Completely open and customizable.
 
-# Support the Project
-This project is Open Source. If you find it useful and would like to support its continued maintenance and development, please consider purchasing it on the [Asset Store](https://u3d.as/1v2R). Think of it as a "tip" to keep the updates coming!
-
 # Technical Notes & Stability
 
 * This asset relies heavily on Unity's internal Editor APIs. While stable for official releases, major Unity updates may occasionally break functionality until a patch is issued.
