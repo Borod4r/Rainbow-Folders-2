@@ -64,7 +64,11 @@ namespace Borodar.RainbowFolders
                 return;
             }
 
-            AssetDatabase.ImportPackage(packagePath, true);
+            #if !UNITY_6000_6_OR_NEWER
+                AssetDatabase.ImportPackage(packagePath, true);
+            #else
+                UnityEditor.AssetPackage.Package.Import(packagePath, true);
+            #endif
         }
 
         private static void ExportRuleset(string dirPath, string fileName)
@@ -97,7 +101,12 @@ namespace Borodar.RainbowFolders
             }
 
             var packagePath = $"{dirPath}/{fileName}.unitypackage";
-            AssetDatabase.ExportPackage(textureDependencies, packagePath);
+            #if !UNITY_6000_6_OR_NEWER
+                AssetDatabase.ExportPackage(textureDependencies, packagePath);
+            #else
+                var exportParameters = new UnityEditor.AssetPackage.ExportPackageParameters(textureDependencies, packagePath);
+                UnityEditor.AssetPackage.Package.Export(exportParameters);
+            #endif
 
             Log("Package with custom icons successfully exported.");
         }
